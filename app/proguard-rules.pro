@@ -15,3 +15,43 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+#Coroutines
+-keepclassmembernames class kotlinx.** {
+    volatile <fields>;
+}
+
+
+#For intrepid classes
+-dontwarn io.intrepid.koroutines.**
+
+#From Moshi Readme
+-dontwarn okio.**
+-dontwarn javax.annotation.**
+-keepclasseswithmembers class * {
+    @com.squareup.moshi.* <methods>;
+}
+-keep @com.squareup.moshi.JsonQualifier interface *
+-keepclassmembers class kotlin.Metadata {
+    public <methods>;
+}
+
+#Retrofit
+-dontwarn retrofit2.Platform$Java8
+
+#Bouncy
+-dontwarn org.bouncycastle.**
+-dontwarn scala.**
+-dontwarn com.google.common.util.concurrent.**
+-dontwarn com.fasterxml.jackson.databind.**
+
+#Disable Notes
+-dontnote okhttp3.**
+-dontnote kotlin.**
+-dontnote io.fabric.**
+-dontnote google.gson.**
+-dontnote com.google.**
+-dontnote com.crashlytics.**
+-dontnote com.squareup.moshi.**
+-dontnote io.reactivex.**
+-dontnote io.intrepid.**

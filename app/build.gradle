@@ -1,26 +1,191 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'com.getkeepsafe.dexcount'
+apply plugin: "org.jetbrains.kotlin.android.extensions"
+apply plugin: 'spoon'
+apply plugin: "io.intrepid.static-analysis"
 
-android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.1"
+apply from: 'version.gradle'
+apply from: 'coverage.gradle'
 
-    defaultConfig {
-        applicationId "io.intrepid.skeleton"
-        minSdkVersion 17
-        targetSdkVersion 24
-        versionCode 1
-        versionName "1.0"
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
+ext.localProperties = new Properties()
+def localPropertiesFile = project.rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    ext.localProperties.load(localPropertiesFile.newDataInputStream())
+}
+ext.getLocalProperty = { propertyName ->
+    def property = localProperties.getProperty(propertyName)
+    return property == null ? "" : property
+}
+
+androidExtensions {
+    experimental = true
+}
+
+kotlin {
+    experimental {
+        coroutines "enable"
     }
 }
 
+android {
+    compileSdkVersion 26
+    buildToolsVersion "26.0.3"
+
+    defaultConfig {
+        applicationId "io.intrepid.koroutines"
+        minSdkVersion 21
+        //noinspection OldTargetApi
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "io.intrepid.koroutines.CustomTestRunner"
+    }
+
+    signingConfigs {
+        debug {
+            storeFile file("../debug.keystore")
+            storePassword "password"
+            keyAlias "debug"
+            keyPassword "password"
+        }
+
+        release {
+            def fileName = getLocalProperty("signing_file")
+            if (!fileName.isEmpty()) {
+                storeFile file(fileName)
+                storePassword getLocalProperty("signing_password")
+                keyAlias getLocalProperty("signing_alias")
+                keyPassword getLocalProperty("signing_key_password")
+            }
+            return true
+        }
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix ".debug"
+            useProguard false
+            minifyEnabled true
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+
+        release {
+            useProguard true
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+        test.java.srcDirs += 'src/test/kotlin'
+        androidTest.java.srcDirs += 'src/androidTest/kotlin'
+    }
+
+    lintOptions {
+        abortOnError false
+        ignore 'IconMissingDensityFolder', 'UnusedResources', 'ObsoleteLintCustomCheck'
+    }
+
+    packagingOptions {
+        exclude 'META-INF/rxjava.properties'
+    }
+}
+
+ext {
+    androidSupportVersion = "26.1.0"
+    googlePlayVersion = "11.6.2"
+    retrofitVersion = "2.3.0"
+    okhttpVersion = "3.9.0"
+    leakCanaryVersion = "1.5.4"
+    chuckVersion = "1.0.2"
+
+    // Common test dependencies
+    junitLib = "junit:junit:4.12"
+    mockitoVersion = "2.10.0"
+    mockitoLib = "org.mockito:mockito-core:$mockitoVersion"
+    supportAnnotationLib = "com.android.support:support-annotations:$androidSupportVersion"
+    androidTestVersion = "1.0.1"
+    espressoVersion = "3.0.1"
+}
+
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:24.1.1'
+    // Local
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    // Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.20'
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:0.20"
+
+    // Crashlytics
+    implementation('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
+        transitive = true
+    }
+
+    // Android Architecture
+    implementation "android.arch.lifecycle:runtime:1.0.3"
+    kapt "android.arch.lifecycle:compiler:1.0.0"
+    implementation "android.arch.lifecycle:extensions:1.0.0"
+    implementation "android.arch.persistence.room:runtime:1.0.0"
+    kapt "android.arch.persistence.room:compiler:1.0.0"
+
+    // Support libraries
+    implementation "com.android.support:recyclerview-v7:$androidSupportVersion"
+    implementation "com.android.support:cardview-v7:$androidSupportVersion"
+    implementation "com.android.support:design:$androidSupportVersion"
+    implementation "com.android.support.constraint:constraint-layout:1.0.2"
+
+    // Google play services
+    implementation "com.google.android.gms:play-services-base:$googlePlayVersion"
+
+    // Square
+//    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+//    implementation "com.squareup.retrofit2:converter-moshi:$retrofitVersion"
+//    implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion"
+    implementation "com.github.square:retrofit:63dfe3ec62e9bf932f5ea243c9b5f9ef78445214"
+
+    implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
+    implementation 'com.squareup.moshi:moshi-kotlin:1.5.0'
+
+    // Moshi Wrapper
+    implementation "com.serjltt.moshi:moshi-lazy-adapters:2.1"
+
+    // Jake
+    implementation 'com.jakewharton.timber:timber:4.5.1'
+
+    // LeakCanary
+    debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakCanaryVersion"
+    releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:$leakCanaryVersion"
+    testImplementation "com.squareup.leakcanary:leakcanary-android-no-op:$leakCanaryVersion"
+
+    // Chuck
+    debugImplementation "com.readystatesoftware.chuck:library:$chuckVersion"
+    releaseImplementation "com.readystatesoftware.chuck:library-no-op:$chuckVersion"
+
+    // Unit tests
+    testImplementation junitLib
+    testImplementation mockitoLib
+    testImplementation supportAnnotationLib
+
+    // UI tests
+    testImplementation "android.arch.core:core-testing:1.0.0"
+    androidTestImplementation junitLib
+    androidTestImplementation mockitoLib
+    androidTestImplementation supportAnnotationLib
+    androidTestImplementation "org.mockito:mockito-android:$mockitoVersion"
+
+    androidTestImplementation "com.android.support.test:runner:$androidTestVersion"
+    androidTestImplementation "com.android.support.test:rules:$androidTestVersion"
+    androidTestImplementation "com.android.support.test.espresso:espresso-core:$espressoVersion"
+    androidTestImplementation "com.android.support.test.espresso:espresso-idling-resource:$espressoVersion"
+    androidTestImplementation "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
 }
