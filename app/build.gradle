@@ -22,13 +22,13 @@ android {
     buildToolsVersion "25.0.2"
 
     defaultConfig {
-        applicationId "io.intrepid.skotlinton"
+        applicationId "io.intrepid.koroutines"
         minSdkVersion 17
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "io.intrepid.skotlinton.CustomTestRunner"
+        testInstrumentationRunner "io.intrepid.koroutines.CustomTestRunner"
     }
 
     signingConfigs {
