@@ -9,10 +9,10 @@ import android.support.test.filters.SmallTest
 import android.support.test.rule.ActivityTestRule
 import io.intrepid.koroutines.InstrumentationTestApplication
 import io.intrepid.koroutines.R
-import io.intrepid.koroutines.rest.TestRestClient
+import io.intrepid.koroutines.api.rest.TestRestClient
+import io.intrepid.koroutines.app.base.settings.UserSettings
+import io.intrepid.koroutines.app.screens.example1.Example1Activity
 import io.intrepid.koroutines.rules.MockServerRule
-import io.intrepid.koroutines.screens.example1.Example1Activity
-import io.intrepid.koroutines.settings.UserSettings
 import io.intrepid.koroutines.testutils.BaseUiTest
 import org.junit.Before
 import org.junit.Rule
@@ -45,8 +45,8 @@ class ExampleSmokeTest : BaseUiTest() {
 
         `when`(mockUserSettings.lastIp).thenReturn("127.0.0.2")
 
-        onView(withId(R.id.example1_button)).perform(click())
-        onView(withId(R.id.example2_current_ip)).check(matches(withText("Your current Ip address is 127.0.0.1")))
-        onView(withId(R.id.example2_previous_ip)).check(matches(withText("Your previous Ip address is 127.0.0.2")))
+        onView(withId(R.id.fragment_example1_button)).perform(click())
+        onView(withId(R.id.fragment_example2_current_ip)).check(matches(withText("Your current Ip address is 127.0.0.1")))
+        onView(withId(R.id.fragment_example2_previous_ip)).check(matches(withText("Your previous Ip address is 127.0.0.2")))
     }
 }

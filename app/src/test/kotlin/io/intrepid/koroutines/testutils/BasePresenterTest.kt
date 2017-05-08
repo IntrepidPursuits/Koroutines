@@ -1,10 +1,10 @@
 package io.intrepid.koroutines.testutils
 
-import io.intrepid.koroutines.base.BaseContract
-import io.intrepid.koroutines.base.BasePresenter
-import io.intrepid.koroutines.logging.CrashReporter
-import io.intrepid.koroutines.rest.RestApi
-import io.intrepid.koroutines.settings.UserSettings
+import io.intrepid.koroutines.app.base.BaseContract
+import io.intrepid.koroutines.app.base.BasePresenter
+import io.intrepid.koroutines.app.base.logging.CrashReporter
+import io.intrepid.koroutines.api.rest.RestApi
+import io.intrepid.koroutines.app.base.settings.UserSettings
 import io.reactivex.schedulers.TestScheduler
 import org.junit.Before
 import org.junit.Rule

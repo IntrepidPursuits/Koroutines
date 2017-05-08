@@ -12,11 +12,10 @@
     >
 
     <Button
-        android:id="@+id/example1_button"
+        android:id="@+id/fragment_example1_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Click"
-        android:textAppearance="@style/Roboto_Regular"
         tools:ignore="HardcodedText"
         />
 </RelativeLayout>

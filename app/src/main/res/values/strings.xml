@@ -7,4 +7,5 @@
     <string name="common_remove">Remove</string>
 
     <string name="app_name">Koroutines</string>
+    <string name="fetching_ip">Fetching IP…</string>
 </resources>
